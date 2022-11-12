@@ -1,8 +1,10 @@
 package com.onsystem.ftpserver.model.VO;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.DocumentReference;
 import org.springframework.data.mongodb.core.mapping.MongoId;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -11,8 +13,8 @@ import java.util.Collection;
 import java.util.List;
 
 @Data
-@Document
-public class User implements UserDetails {
+@Document(collection = "user")
+public class UserVO implements UserDetails {
     private @MongoId ObjectId id;
     private String password;
     private String userName;
@@ -21,9 +23,17 @@ public class User implements UserDetails {
     private boolean isAccountNonLocked;
     private boolean isCredentialsNonExpired;
     private boolean isEnabled;
-    private List<GrantedAuthority> roles;
+
+    @DocumentReference
+    private List<RoleVO> roles;
+    @DocumentReference
+    private List< WorkSpaceVO > workSpace;
+    @DocumentReference
+    private List< PermissionWorkSpaceVO > permissionWorkSpace;
+
 
     @Override
+    @JsonIgnore
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return roles;
     }
@@ -39,21 +49,25 @@ public class User implements UserDetails {
     }
 
     @Override
+    @JsonIgnore
     public boolean isAccountNonExpired() {
         return isAccountExpired;
     }
 
     @Override
+    @JsonIgnore
     public boolean isAccountNonLocked() {
         return isAccountNonLocked;
     }
 
     @Override
+    @JsonIgnore
     public boolean isCredentialsNonExpired() {
         return isCredentialsNonExpired;
     }
 
     @Override
+    @JsonIgnore
     public boolean isEnabled() {
         return isEnabled;
     }

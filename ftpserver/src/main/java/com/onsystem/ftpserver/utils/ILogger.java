@@ -1,4 +1,4 @@
-package com.onsystem.ftpserver.configuration;
+package com.onsystem.ftpserver.utils;
 
 public interface ILogger {
 

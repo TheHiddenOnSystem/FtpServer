@@ -1,10 +1,10 @@
-package com.onsystem.ftpserver.dto;
+package com.onsystem.ftpserver.model.request;
 
 import lombok.Data;
 
 
 @Data
-public class UserRegister {
+public class UserRegisterRequest {
     private String password;
     private String userName;
     private String email;

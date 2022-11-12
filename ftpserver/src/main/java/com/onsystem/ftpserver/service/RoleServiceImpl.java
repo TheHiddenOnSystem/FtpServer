@@ -1,21 +1,22 @@
 package com.onsystem.ftpserver.service;
 
-import com.onsystem.ftpserver.configuration.ILogger;
-import com.onsystem.ftpserver.model.VO.Role;
+import com.onsystem.ftpserver.utils.ILogger;
+import com.onsystem.ftpserver.model.VO.RoleVO;
 import com.onsystem.ftpserver.repository.RoleRepository;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Optional;
 
-@Service
-public class RoleServiceImpl implements IRoleService{
+@Component
+public class RoleServiceImpl implements RoleService {
 
     @Autowired
     private ILogger logger;
     @Autowired
-    private RoleRepository iRoleService;
+    private RoleRepository roleRepository;
 
 
     @Override
@@ -25,10 +26,8 @@ public class RoleServiceImpl implements IRoleService{
                 throw new IllegalArgumentException();
             });
 
-            Role role = new Role();
-            role.setName(name);
-
-            return Optional.of(iRoleService.save(role).getObjectId());
+            RoleVO role = new RoleVO(null,name);
+            return Optional.of(roleRepository.save(role).getObjectId());
         }catch (Exception e){
             logger.logInfo(this.getClass(),"Cant create role");
         }
@@ -36,12 +35,23 @@ public class RoleServiceImpl implements IRoleService{
     }
 
     @Override
-    public Optional<Role> findById(ObjectId id) {
-        return iRoleService.findById(id);
+    public Optional<RoleVO> findById(ObjectId id) {
+        return roleRepository.findById(id);
     }
 
     @Override
-    public Optional<Role> findByName(String name) {
-        return iRoleService.findByName(name);
+    public Optional<RoleVO> findByName(String name) {
+        return roleRepository.findByName(name);
+    }
+
+    @Override
+    public Optional< List < RoleVO > > getAllRole() {
+        try {
+            return Optional.of(roleRepository.findAll());
+        }catch (Exception e){
+            logger.logInfo(this.getClass(),"Cant get roles");
+        }
+
+        return Optional.empty();
     }
 }

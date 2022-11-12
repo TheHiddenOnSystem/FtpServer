@@ -1,7 +1,7 @@
-package com.onsystem.ftpserver.configuration;
+package com.onsystem.ftpserver.utils;
 
 
-import org.springframework.beans.factory.annotation.Value;
+import com.onsystem.ftpserver.configuration.Constanst;
 
 import java.util.logging.Level;
 

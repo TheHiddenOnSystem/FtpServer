@@ -1,35 +1,35 @@
 package com.onsystem.ftpserver.configuration;
 
-import com.onsystem.ftpserver.model.VO.User;
-import com.onsystem.ftpserver.service.IRoleService;
-import com.onsystem.ftpserver.service.IUserService;
+import com.onsystem.ftpserver.model.VO.UserVO;
+import com.onsystem.ftpserver.repository.RoleRepository;
+import com.onsystem.ftpserver.repository.UserRepository;
+import com.onsystem.ftpserver.utils.AttributeSession;
+import com.onsystem.ftpserver.utils.ILogger;
+import com.onsystem.ftpserver.utils.ManagerAttributesSession;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-
 
 public class AuthenticationService implements UserDetailsService {
 
     @Autowired
     private ILogger logger;
     @Autowired
-    private AuthenticationManager authenticationManager;
+    private UserRepository userRepository;
     @Autowired
-    private IUserService iUserService;
+    private RoleRepository iRoleService;
+
     @Autowired
-    private IRoleService iRoleService;
+    private ManagerAttributesSession managerAttributesSession;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = iUserService.findByUserName(username)
+        final UserVO user = userRepository.findByUserName(username)
                 .orElseThrow();
 
-        authenticationManager.authenticate(
-                UsernamePasswordAuthenticationToken.authenticated(user.getUsername(),user.getPassword(),user.getAuthorities())
-        );
+        AttributeSession attributeSession = new AttributeSession(user.getId());
+        managerAttributesSession.setAttributesInHttpSession(attributeSession);
 
         return user;
     }

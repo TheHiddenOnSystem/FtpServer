@@ -1,23 +1,25 @@
 package com.onsystem.ftpserver.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.onsystem.ftpserver.configuration.ILogger;
-import com.onsystem.ftpserver.dto.UserRegister;
-import com.onsystem.ftpserver.model.VO.User;
+import com.onsystem.ftpserver.model.VO.RoleVO;
+import com.onsystem.ftpserver.utils.FilesManager;
+import com.onsystem.ftpserver.utils.ILogger;
+import com.onsystem.ftpserver.model.request.UserRegisterRequest;
+import com.onsystem.ftpserver.model.VO.UserVO;
 import com.onsystem.ftpserver.repository.UserRepository;
+import com.onsystem.ftpserver.utils.ManagerAttributesSession;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
+import javax.servlet.http.HttpSession;
+import java.util.List;
 import java.util.Optional;
 
-@Service
-public class UserServiceImpl implements IUserService{
+@Component
+public class UserServiceImpl implements UserService {
     @Autowired
     private ILogger logger;
     @Autowired
@@ -25,47 +27,68 @@ public class UserServiceImpl implements IUserService{
     @Autowired
     private UserRepository userRepository;
     @Autowired
-    private AuthenticationManager authenticationManager;
-    @Autowired
     private BCryptPasswordEncoder bCryptPasswordEncoder;
+    @Autowired
+    private ManagerAttributesSession managerAttributesSession;
+
+    @Autowired
+    private RoleService roleService;
+    @Autowired
+    private FilesManager filesManager;
 
     @Override
-    public Optional<ObjectId> insertUser(UserRegister userRegister) {
+    public Optional<ObjectId> insertUser(UserRegisterRequest userRegister) {
+        Optional< ObjectId > objectId = Optional.empty();
+
         try{
             findByUserName(userRegister.getUserName()).ifPresent(user1 -> {
                 throw new IllegalArgumentException();
             });
 
-            User user = objectMapper.convertValue(userRegister, User.class);
+            UserVO user = objectMapper.convertValue(userRegister, UserVO.class);
             user.setPassword(bCryptPasswordEncoder.encode(userRegister.getPassword()));
             user.setEnabled(true);
-            user.setAccountExpired(false);
+            user.setAccountExpired(true);
             user.setAccountNonLocked(true);
             user.setCredentialsNonExpired(true);
 
-            return Optional.of(userRepository.save(user).getId());
+            RoleVO roleVO = roleService.findByName("user")
+                    .orElseThrow();
+            user.setRoles(List.of(roleVO));
+
+            user.setPermissionWorkSpace(List.of());
+            user.setWorkSpace(List.of());
+
+            objectId = Optional.of(userRepository.save(user).getId());
+
+            filesManager.createDir(objectId.get().toString()).orElseThrow(
+                    () -> new IllegalArgumentException("Cant create directory")
+            );
         }catch (Exception e){
-            this.logger.logInfo(this.getClass(),"Cant create user");
+            this.logger.logWarning(this.getClass(),"Cant create user");
         }
-        return Optional.empty();
+        return objectId;
     }
 
     @Override
-    public Optional<User> findById(ObjectId id) {
+    public Optional< UserVO > findById(ObjectId id) {
         return userRepository.findById(id);
     }
 
     @Override
-    public Optional<User> findByUserName(String userName) {
+    public Optional< UserVO > findByUserName(String userName) {
         return userRepository.findByUserName(userName);
     }
 
     @Override
-    public Optional<Integer> authenticateUser(String name, String password) {
-        Authentication authentication=authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(name,password));
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-
+    public Optional< UserVO > findByUserLogged() {
+        try {
+            return findById(managerAttributesSession.getAttributesInHttpSession().getObjectId());
+        }catch (Exception e){
+            logger.logWarning(getClass(), "Cant find user logged");
+        }
         return Optional.empty();
     }
+
+
 }
