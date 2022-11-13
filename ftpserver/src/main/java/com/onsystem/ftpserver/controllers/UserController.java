@@ -12,6 +12,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import java.util.List;
 import java.util.Optional;
 
 @Controller
@@ -31,10 +32,27 @@ public class UserController {
             }
     )
     public ResponseEntity < ? > userLoggedInfo(){
-        Optional <UserDto> userVO = iUserService.findByUserLoggedDto();
+        Optional < UserDto > userVO = iUserService.findByUserLoggedDto();
 
         return userVO.isPresent() ?
                 new ResponseEntity<>(userVO.get(), HttpStatus.OK) :
+                new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+
+    @GetMapping("allUsers")
+    @Operation(
+            description = "Get All Users",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "If can return users info"),
+                    @ApiResponse(responseCode = "500", description = "Cant return users info")
+            }
+    )
+    public ResponseEntity < ? > getAllUsers(){
+        Optional < List < UserDto > > allUsers = iUserService.findAllUserDto();
+
+        return allUsers.isPresent() ?
+                new ResponseEntity<>(allUsers.get(), HttpStatus.OK) :
                 new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
     }
 

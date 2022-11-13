@@ -1,30 +1,18 @@
 package com.onsystem.ftpserver.model.dto;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import lombok.*;
-import lombok.experimental.Tolerate;
 import org.bson.types.ObjectId;
 
 import java.util.List;
 
 @AllArgsConstructor
 @NoArgsConstructor
-@Getter
-public class PermissionWorkSpaceDto extends MongoDto{
-
+@Data
+public class PermissionWorkSpaceDto {
+    private String objectId;
     private String workSpace;
-    private String users;
-    @Setter
+    private String user;
     private List<String> permission;
-
-
-    @Tolerate
-    public void setWorkSpace(ObjectId workSpace) {
-        this.workSpace = workSpace.toString();
-    }
-    @Tolerate
-    public void setUsers(ObjectId users) {
-        this.users = users.toString();
-    }
-
-
 }

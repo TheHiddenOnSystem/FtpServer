@@ -1,6 +1,8 @@
 package com.onsystem.ftpserver.model.VO;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import lombok.Data;
 import lombok.experimental.Tolerate;
 import org.bson.types.ObjectId;
@@ -16,15 +18,15 @@ import java.util.List;
 @Data
 @Document(collection = "user")
 public class UserVO implements UserDetails {
+    @JsonSerialize(using= ToStringSerializer.class)
     private @MongoId ObjectId objectId;
     private String password;
-    private String userName;
+    private String username;
     private String email;
     private boolean isAccountExpired;
     private boolean isAccountNonLocked;
     private boolean isCredentialsNonExpired;
     private boolean isEnabled;
-
     @DocumentReference
     private List<RoleVO> roles;
     @DocumentReference
@@ -32,21 +34,27 @@ public class UserVO implements UserDetails {
     @DocumentReference
     private List< PermissionWorkSpaceVO > permissionWorkSpace;
 
-
-    @Override
-    @JsonIgnore
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        return roles;
+    public void setObjectId(ObjectId objectId) {
+        this.objectId = objectId;
     }
+    @Tolerate
+    public void setObjectId(String objectId) {
+        this.objectId = new ObjectId(objectId);
+    }
+
 
     @Override
     public String getPassword() {
         return password;
     }
-
     @Override
     public String getUsername() {
-        return userName;
+        return username;
+    }
+    @Override
+    @JsonIgnore
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return roles;
     }
 
     @Override

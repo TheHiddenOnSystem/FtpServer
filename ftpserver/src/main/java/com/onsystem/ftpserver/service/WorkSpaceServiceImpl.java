@@ -180,10 +180,10 @@ public class WorkSpaceServiceImpl implements WorkSpaceService{
     }
 
     @Override
-    public boolean update(WorkSpaceVO workSpaceVO) {
+    public Optional< ObjectId > update(WorkSpaceVO workSpaceVO) {
+        Optional< ObjectId > objectId = Optional.empty();
         try {
-            workSpaceRepository.save(workSpaceVO);
-            return true;
+            objectId = Optional.of(workSpaceRepository.save(workSpaceVO).getObjectId());
         }catch (Exception e){
             logger.logInfo(getClass(),"Cant update Workspace, "
                     + String.format("user: %s , workspace: %s", managerAttributesSession.getAttributesInHttpSession().getObjectId()
@@ -191,7 +191,7 @@ public class WorkSpaceServiceImpl implements WorkSpaceService{
             );
         }
 
-        return false;
+        return objectId;
     }
 
     private boolean userHavePermissionOrIsOwner(ObjectId workSpaceId, ObjectId userId, String permission){
@@ -204,7 +204,7 @@ public class WorkSpaceServiceImpl implements WorkSpaceService{
         Optional< PermissionWorkSpaceVO > spaceVO = workSpaceUser.getPermissionWorkSpace()
                 .stream()
                 .filter(
-                        permissionWorkSpaceVO -> permissionWorkSpaceVO.getUsers() == userId
+                        permissionWorkSpaceVO -> permissionWorkSpaceVO.getUser() == userId
                                 && permissionWorkSpaceVO.getPermission().stream().anyMatch(s -> s.contains(permission))
                 )
                 .findFirst();

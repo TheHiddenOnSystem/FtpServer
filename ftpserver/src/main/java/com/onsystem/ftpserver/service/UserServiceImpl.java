@@ -3,6 +3,7 @@ package com.onsystem.ftpserver.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.onsystem.ftpserver.model.VO.RoleVO;
 import com.onsystem.ftpserver.model.dto.UserDto;
+import com.onsystem.ftpserver.model.dto.WorkSpaceDto;
 import com.onsystem.ftpserver.utils.FilesManager;
 import com.onsystem.ftpserver.utils.ILogger;
 import com.onsystem.ftpserver.model.request.UserRegisterRequest;
@@ -16,6 +17,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpSession;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -42,7 +44,7 @@ public class UserServiceImpl implements UserService {
         Optional< ObjectId > objectId = Optional.empty();
 
         try{
-            findByUserName(userRegister.getUserName()).ifPresent(user1 -> {
+            findByUserName(userRegister.getUsername()).ifPresent(user1 -> {
                 throw new IllegalArgumentException();
             });
 
@@ -146,6 +148,21 @@ public class UserServiceImpl implements UserService {
             logger.logWarning(getClass(), "Can convert UserVo to dto in findByUserLoggedDto");
         }
         return Optional.empty();
+    }
+
+    @Override
+    public Optional<List < UserDto > > findAllUserDto() {
+        Optional< List < UserDto > > listUser = Optional.empty();
+        try {
+            listUser = Optional.of(
+                    Arrays.asList(
+                            objectMapper.convertValue(userRepository.findAll(), UserDto[].class)
+                    )
+            );
+        }catch (Exception e){
+            logger.logWarning(getClass(), "Cant getAll users dto in findAllUserDto");
+        }
+        return listUser;
     }
 
 

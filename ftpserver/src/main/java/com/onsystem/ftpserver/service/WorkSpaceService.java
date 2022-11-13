@@ -24,5 +24,5 @@ public interface WorkSpaceService {
     Optional< File > createFile(String workSpace, String name);
     Optional< File > createDirectory(String workSpace, String name);
 
-    boolean update(WorkSpaceVO workSpaceVO);
+    Optional< ObjectId > update(WorkSpaceVO workSpaceVO);
 }
