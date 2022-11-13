@@ -2,6 +2,7 @@ package com.onsystem.ftpserver.model.VO;
 
 
 import lombok.Data;
+import lombok.experimental.Tolerate;
 import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.DocumentReference;
@@ -21,5 +22,6 @@ public class WorkSpaceVO {
 
     @DocumentReference
     private List< PermissionWorkSpaceVO > permissionWorkSpace;
+
 
 }

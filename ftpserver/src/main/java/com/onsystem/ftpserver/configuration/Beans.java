@@ -30,14 +30,15 @@ public class Beans {
     }
     @Bean
     public ObjectMapper objectMapper(){
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS,false);
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        mapper.configure(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT, true);
+        mapper.configure(DeserializationFeature.ACCEPT_EMPTY_ARRAY_AS_NULL_OBJECT, true);
 
-        objectMapper.configure(DeserializationFeature.ACCEPT_EMPTY_ARRAY_AS_NULL_OBJECT,true);
-        objectMapper.configure(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT,true);
-        objectMapper.configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY,true);
-
-        return objectMapper;
+        mapper.configure(SerializationFeature.WRITE_SELF_REFERENCES_AS_NULL,true);
+        mapper.configure(SerializationFeature.FAIL_ON_SELF_REFERENCES,false);
+        mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS,false);
+        return mapper;
     }
     @Bean
     public BCryptPasswordEncoder bCryptPasswordEncoder() {
@@ -54,7 +55,9 @@ public class Beans {
                 .disable().cors()
                 .and()
                 .authorizeRequests()
-                .antMatchers("/api/v1/**")
+                .antMatchers("/api/v1/*")
+                .hasRole("user")
+                .antMatchers("/api/v1/auth/*")
                 .permitAll();
 
         http.formLogin().disable();

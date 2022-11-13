@@ -1,5 +1,6 @@
 package com.onsystem.ftpserver.service;
 
+import com.onsystem.ftpserver.model.dto.UserDto;
 import com.onsystem.ftpserver.model.request.UserRegisterRequest;
 import com.onsystem.ftpserver.model.VO.UserVO;
 import org.bson.types.ObjectId;
@@ -9,9 +10,12 @@ import java.util.Optional;
 public interface UserService {
 
     Optional<ObjectId> insertUser(UserRegisterRequest userRegister);
-
+    Optional<ObjectId> updateUser(UserVO userVO);
     Optional<UserVO> findById(ObjectId id);
+    Optional<UserDto> findByIdDto(ObjectId id);
     Optional<UserVO> findByUserName(String userName);
+    Optional<UserDto> findByUserNameDto(String userName);
     Optional<UserVO> findByUserLogged();
+    Optional<UserDto> findByUserLoggedDto();
 
 }

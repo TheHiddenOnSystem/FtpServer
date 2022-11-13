@@ -1,6 +1,7 @@
 package com.onsystem.ftpserver.controllers;
 
 import com.onsystem.ftpserver.model.VO.RoleVO;
+import com.onsystem.ftpserver.model.dto.RoleDto;
 import com.onsystem.ftpserver.service.RoleService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -36,7 +37,7 @@ public class RoleController {
         Optional< ObjectId > objectId = iRoleService.insertRole(name);
 
         return objectId.isPresent()?
-                new ResponseEntity<>(objectId.get(),HttpStatus.OK) :
+                new ResponseEntity<>(objectId.get().toString(),HttpStatus.OK) :
                 new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
@@ -49,7 +50,7 @@ public class RoleController {
             }
     )
     public ResponseEntity < ? > getAllRole(){
-        Optional< List<RoleVO> > roles = iRoleService.getAllRole();
+        Optional< List<RoleDto> > roles = iRoleService.getAllRoleDto();
 
         return  roles.isPresent()?
                 new ResponseEntity<>(roles.get(),HttpStatus.OK) :

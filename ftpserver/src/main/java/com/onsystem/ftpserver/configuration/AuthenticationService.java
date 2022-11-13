@@ -28,7 +28,7 @@ public class AuthenticationService implements UserDetailsService {
         final UserVO user = userRepository.findByUserName(username)
                 .orElseThrow();
 
-        AttributeSession attributeSession = new AttributeSession(user.getId());
+        AttributeSession attributeSession = new AttributeSession(user.getObjectId());
         managerAttributesSession.setAttributesInHttpSession(attributeSession);
 
         return user;

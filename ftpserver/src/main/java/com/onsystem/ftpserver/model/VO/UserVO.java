@@ -2,6 +2,7 @@ package com.onsystem.ftpserver.model.VO;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
+import lombok.experimental.Tolerate;
 import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.DocumentReference;
@@ -15,7 +16,7 @@ import java.util.List;
 @Data
 @Document(collection = "user")
 public class UserVO implements UserDetails {
-    private @MongoId ObjectId id;
+    private @MongoId ObjectId objectId;
     private String password;
     private String userName;
     private String email;

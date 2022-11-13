@@ -1,6 +1,7 @@
 package com.onsystem.ftpserver.controllers;
 
 import com.onsystem.ftpserver.model.VO.WorkSpaceVO;
+import com.onsystem.ftpserver.model.dto.WorkSpaceDto;
 import com.onsystem.ftpserver.model.request.WorkSpaceCreateRequest;
 import com.onsystem.ftpserver.service.WorkSpaceService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -36,7 +37,7 @@ public class WorkSpaceController {
         Optional< ObjectId > objectId = workSpaceService.insert(workSpaceCreateRequest);
 
         return objectId.isPresent() ?
-                new ResponseEntity<>(objectId.get(), HttpStatus.OK) :
+                new ResponseEntity<>(objectId.get().toString(), HttpStatus.OK) :
                 new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
@@ -49,7 +50,7 @@ public class WorkSpaceController {
             }
     )
     public ResponseEntity < ? > getWorkSpace(){
-        Optional< List < WorkSpaceVO > > workSpaceVO = workSpaceService.findByIdUser();
+        Optional< List <WorkSpaceDto> > workSpaceVO = workSpaceService.findByIdUserDto();
         return workSpaceVO.isPresent()?
                 new ResponseEntity<>(workSpaceVO.get(), HttpStatus.OK) :
                 new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR) ;
@@ -83,10 +84,10 @@ public class WorkSpaceController {
             }
     )
     public ResponseEntity < ? > createFileInWorkSpace(
-            @RequestParam ObjectId workSpace,
-            @RequestParam String name
+            @RequestParam String workSpace,
+            @RequestParam String pathName
     ){
-        Optional< File > file = workSpaceService.createFile(workSpace,name);
+        Optional< File > file = workSpaceService.createFile(workSpace,pathName);
 
         return file.isPresent()?
                 new ResponseEntity<>(HttpStatus.OK) :

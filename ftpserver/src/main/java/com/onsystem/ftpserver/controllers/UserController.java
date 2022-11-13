@@ -1,6 +1,7 @@
 package com.onsystem.ftpserver.controllers;
 
 import com.onsystem.ftpserver.model.VO.UserVO;
+import com.onsystem.ftpserver.model.dto.UserDto;
 import com.onsystem.ftpserver.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -30,7 +31,7 @@ public class UserController {
             }
     )
     public ResponseEntity < ? > userLoggedInfo(){
-        Optional < UserVO > userVO = iUserService.findByUserLogged();
+        Optional <UserDto> userVO = iUserService.findByUserLoggedDto();
 
         return userVO.isPresent() ?
                 new ResponseEntity<>(userVO.get(), HttpStatus.OK) :

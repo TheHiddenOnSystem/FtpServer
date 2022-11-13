@@ -1,5 +1,7 @@
 package com.onsystem.ftpserver.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.onsystem.ftpserver.model.dto.RoleDto;
 import com.onsystem.ftpserver.utils.ILogger;
 import com.onsystem.ftpserver.model.VO.RoleVO;
 import com.onsystem.ftpserver.repository.RoleRepository;
@@ -7,6 +9,7 @@ import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -15,6 +18,8 @@ public class RoleServiceImpl implements RoleService {
 
     @Autowired
     private ILogger logger;
+    @Autowired
+    private ObjectMapper objectMapper;
     @Autowired
     private RoleRepository roleRepository;
 
@@ -52,6 +57,20 @@ public class RoleServiceImpl implements RoleService {
             logger.logInfo(this.getClass(),"Cant get roles");
         }
 
+        return Optional.empty();
+    }
+
+    @Override
+    public Optional< List <RoleDto> > getAllRoleDto(){
+        try {
+            Optional<List < RoleVO > >  roleVOS = getAllRole();
+            if(roleVOS.isPresent()){
+                List <RoleDto> roleDtos = Arrays.asList(objectMapper.convertValue(roleVOS.get(),RoleDto[].class));
+                return Optional.of(roleDtos);
+            }
+        }catch (Exception e){
+            logger.logInfo(this.getClass(),"Cant get roles");
+        }
         return Optional.empty();
     }
 }

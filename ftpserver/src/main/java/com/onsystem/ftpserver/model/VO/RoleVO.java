@@ -3,6 +3,7 @@ package com.onsystem.ftpserver.model.VO;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.experimental.Tolerate;
 import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.MongoId;
@@ -21,4 +22,5 @@ public class RoleVO implements GrantedAuthority {
     public String getAuthority() {
         return name;
     }
+
 }

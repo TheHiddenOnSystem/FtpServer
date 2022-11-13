@@ -12,7 +12,7 @@ import java.util.Optional;
 @Repository
 public interface WorkSpaceRepository extends MongoRepository< WorkSpaceVO, ObjectId > {
 
-    @Query("{ user : $0 }")
+    @Query("value = { user : $0 }")
     Optional< List < WorkSpaceVO > > findByUserId(ObjectId objectIdUser);
 
 }

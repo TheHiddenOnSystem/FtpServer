@@ -2,6 +2,7 @@ package com.onsystem.ftpserver.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.onsystem.ftpserver.model.VO.RoleVO;
+import com.onsystem.ftpserver.model.dto.UserDto;
 import com.onsystem.ftpserver.utils.FilesManager;
 import com.onsystem.ftpserver.utils.ILogger;
 import com.onsystem.ftpserver.model.request.UserRegisterRequest;
@@ -59,7 +60,7 @@ public class UserServiceImpl implements UserService {
             user.setPermissionWorkSpace(List.of());
             user.setWorkSpace(List.of());
 
-            objectId = Optional.of(userRepository.save(user).getId());
+            objectId = Optional.of(userRepository.save(user).getObjectId());
 
             filesManager.createDir(objectId.get().toString()).orElseThrow(
                     () -> new IllegalArgumentException("Cant create directory")
@@ -71,21 +72,78 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public Optional<ObjectId> updateUser(UserVO userVO) {
+        try {
+            if( findById( userVO.getObjectId())
+                    .isPresent()
+            )
+                return Optional.of(userRepository.save(userVO).getObjectId());
+        }catch (Exception e){
+            logger.logWarning(getClass(), "Cant update user ");
+        }
+        return Optional.empty();
+    }
+
+    @Override
     public Optional< UserVO > findById(ObjectId id) {
         return userRepository.findById(id);
+    }
+
+
+    @Override
+    public Optional<UserDto> findByIdDto(ObjectId id) {
+        try {
+            Optional< UserVO > userVO = findById(id);
+            if(userVO.isPresent()){
+                UserDto userDto = objectMapper.convertValue(userVO.get(),UserDto.class);
+                return Optional.of(userDto);
+            }
+        }catch (Exception e){
+            logger.logWarning(getClass(), "Can convert UserVo to dto in findByIdDto");
+        }
+        return Optional.empty();
     }
 
     @Override
     public Optional< UserVO > findByUserName(String userName) {
         return userRepository.findByUserName(userName);
     }
+    @Override
+    public Optional<UserDto> findByUserNameDto(String userName) {
+        try {
+            Optional< UserVO > userVO = findByUserName(userName);
+            if(userVO.isPresent()){
+                UserDto userDto = objectMapper.convertValue(userVO.get(),UserDto.class);
+                return Optional.of(userDto);
+            }
+        }catch (Exception e){
+            logger.logWarning(getClass(), "Can convert UserVo to dto in findByUserNameDto");
+        }
+        return Optional.empty();
+    }
 
     @Override
     public Optional< UserVO > findByUserLogged() {
+        ObjectId userId = managerAttributesSession.getAttributesInHttpSession().getObjectId();
         try {
-            return findById(managerAttributesSession.getAttributesInHttpSession().getObjectId());
+            return findById(userId);
         }catch (Exception e){
-            logger.logWarning(getClass(), "Cant find user logged");
+            logger.logWarning(getClass(), "Cant find user logged userId: "+userId);
+        }
+        return Optional.empty();
+    }
+
+    @Override
+    public Optional<UserDto> findByUserLoggedDto() {
+
+        try {
+            Optional< UserVO > userVO = findByUserLogged();
+            if(userVO.isPresent()){
+                UserDto userDto = objectMapper.convertValue(userVO.get(),UserDto.class);
+                return Optional.of(userDto);
+            }
+        }catch (Exception e){
+            logger.logWarning(getClass(), "Can convert UserVo to dto in findByUserLoggedDto");
         }
         return Optional.empty();
     }

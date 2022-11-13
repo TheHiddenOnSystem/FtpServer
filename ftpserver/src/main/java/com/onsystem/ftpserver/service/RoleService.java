@@ -1,6 +1,7 @@
 package com.onsystem.ftpserver.service;
 
 import com.onsystem.ftpserver.model.VO.RoleVO;
+import com.onsystem.ftpserver.model.dto.RoleDto;
 import org.bson.types.ObjectId;
 
 import java.util.List;
@@ -14,5 +15,6 @@ public interface RoleService {
     Optional<RoleVO> findByName(String name);
 
     Optional< List <RoleVO> > getAllRole();
+    Optional< List <RoleDto> > getAllRoleDto();
 
 }

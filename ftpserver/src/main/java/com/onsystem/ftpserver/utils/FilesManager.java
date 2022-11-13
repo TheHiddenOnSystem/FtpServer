@@ -7,8 +7,6 @@ import java.io.File;
 import java.net.URI;
 import java.nio.file.FileSystemException;
 import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.Iterator;
 import java.util.Optional;
 
 @Service
@@ -41,11 +39,11 @@ public class FilesManager {
             File file = new File(uri);
 
             if(!file.createNewFile())
-                throw new FileSystemException("Cant create directory");
+                throw new FileSystemException("Cant create file");
 
             return Optional.of(file);
         }catch (Exception e){
-            logger.logWarning(getClass(),"Cant create Dir");
+            logger.logWarning(getClass(),"Cant create file");
         }
         return Optional.empty();
     }
