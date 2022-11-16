@@ -11,12 +11,9 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URI;
-import java.nio.file.FileSystemException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Optional;
+import java.nio.file.*;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class FileStorageServiceImpl implements FileStorageService{
@@ -35,9 +32,10 @@ public class FileStorageServiceImpl implements FileStorageService{
     public boolean save( MultipartFile file, String... path ) {
         boolean result = false;
         try {
+            List<String> paths = Arrays.stream(path).filter(s -> !s.isEmpty()).toList();
+            Path lastPath = Path.of(path_initial, paths.toArray(new String[0]));
 
-            Path lastPath = Path.of(path_initial, path);
-            Files.copy( file.getInputStream(), lastPath );
+            file.transferTo(lastPath);
             result = true;
         }catch ( Exception e ){
             logger.logWarning( getClass(), "Error save file" );

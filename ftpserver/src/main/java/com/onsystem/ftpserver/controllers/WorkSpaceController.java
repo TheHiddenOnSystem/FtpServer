@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.onsystem.ftpserver.model.VO.WorkSpaceVO;
 import com.onsystem.ftpserver.model.dto.StructFile;
 import com.onsystem.ftpserver.model.dto.WorkSpaceDto;
+import com.onsystem.ftpserver.model.request.InsertFileMultipart;
 import com.onsystem.ftpserver.model.request.WorkSpaceCreateRequest;
 import com.onsystem.ftpserver.service.FileStorageService;
 import com.onsystem.ftpserver.service.WorkSpaceService;
@@ -11,13 +12,17 @@ import com.onsystem.ftpserver.utils.AttributeSession;
 import com.onsystem.ftpserver.utils.ILogger;
 import com.onsystem.ftpserver.utils.ManagerAttributesSession;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.util.Arrays;
@@ -142,6 +147,31 @@ public class WorkSpaceController {
 
         return structFile.isPresent()
                 ? new ResponseEntity<>(structFile.get(), HttpStatus.OK)
+                : new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @PostMapping(value = "insertFile", consumes = {
+            MediaType.MULTIPART_FORM_DATA_VALUE
+    } )
+    @Operation(
+            description = "Insert file in workSpace"
+    )
+    public ResponseEntity< ? > insertFile(@ModelAttribute InsertFileMultipart insertFileMultipart){
+        Optional< WorkSpaceVO > workSpaceVO = workSpaceService.findById(new ObjectId(insertFileMultipart.getWorkSpaceId()));
+        boolean resultInsertOperation = false;
+
+        if(workSpaceVO.isPresent())
+            resultInsertOperation = fileStorageService.save(
+                    insertFileMultipart.getFile(),
+                    workSpaceVO.get().getUser().toHexString(),
+                    workSpaceVO.get().getObjectId().toHexString(),
+                    insertFileMultipart.getPath(),
+                    insertFileMultipart.getFile().getOriginalFilename()
+            );
+
+
+        return resultInsertOperation
+                ? new ResponseEntity<>(HttpStatus.OK)
                 : new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
