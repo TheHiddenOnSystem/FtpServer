@@ -1,9 +1,15 @@
 package com.onsystem.ftpserver.controllers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.onsystem.ftpserver.model.VO.WorkSpaceVO;
+import com.onsystem.ftpserver.model.dto.StructFile;
 import com.onsystem.ftpserver.model.dto.WorkSpaceDto;
 import com.onsystem.ftpserver.model.request.WorkSpaceCreateRequest;
+import com.onsystem.ftpserver.service.FileStorageService;
 import com.onsystem.ftpserver.service.WorkSpaceService;
+import com.onsystem.ftpserver.utils.AttributeSession;
+import com.onsystem.ftpserver.utils.ILogger;
+import com.onsystem.ftpserver.utils.ManagerAttributesSession;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.bson.types.ObjectId;
@@ -14,15 +20,23 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
 @Controller
 @RequestMapping("/api/v1/workspace/")
 public class WorkSpaceController {
-
+    @Autowired
+    private ILogger logger;
+    @Autowired
+    private ObjectMapper objectMapper;
+    @Autowired
+    private ManagerAttributesSession managerAttributesSession;
     @Autowired
     private WorkSpaceService workSpaceService;
+    @Autowired
+    private FileStorageService fileStorageService;
 
 
     @PutMapping("insert")
@@ -50,9 +64,26 @@ public class WorkSpaceController {
             }
     )
     public ResponseEntity < ? > getWorkSpace(){
-        Optional< List <WorkSpaceDto> > workSpaceVO = workSpaceService.findByIdUserDto();
-        return workSpaceVO.isPresent()?
-                new ResponseEntity<>(workSpaceVO.get(), HttpStatus.OK) :
+        Optional< List <WorkSpaceDto> > workSpaceResult = Optional.empty();
+
+        try {
+            AttributeSession attributeSession = managerAttributesSession.getAttributesInHttpSession();
+            Optional< List < WorkSpaceVO > > workSpaceVOS = workSpaceService.findByIdUser(attributeSession.getObjectId());
+
+            if(workSpaceVOS.isPresent())
+                workSpaceResult = Optional.of(
+                        Arrays.asList(
+                                objectMapper.convertValue(workSpaceVOS.get(), WorkSpaceDto[].class)
+                        )
+                );
+
+        }catch (Exception e){
+            logger.logWarning(getClass(), "Error endpoint getWorkSpace");
+        }
+
+
+        return workSpaceResult.isPresent()?
+                new ResponseEntity<>(workSpaceResult.get(), HttpStatus.OK) :
                 new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR) ;
     }
 
@@ -93,4 +124,25 @@ public class WorkSpaceController {
                 new ResponseEntity<>(HttpStatus.OK) :
                 new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR) ;
     }
+
+    @GetMapping("listDirectories/{idWorkSpace}")
+    @Operation(
+            description = "List all files or directories in workSpace",
+            responses = {
+                    @ApiResponse( responseCode = "200", description = "Can list directories" ),
+                    @ApiResponse( responseCode = "500", description = "Cant list directories" )
+            }
+    )
+    public ResponseEntity< ? > listDirectories( @PathVariable String idWorkSpace ){
+        Optional< StructFile > structFile = Optional.empty();
+        Optional< WorkSpaceVO > workSpaceVO = workSpaceService.findById(new ObjectId(idWorkSpace));
+
+        if( workSpaceVO.isPresent() )
+            structFile = fileStorageService.listAllFiles(workSpaceVO.get().getUser().toHexString(),idWorkSpace);
+
+        return structFile.isPresent()
+                ? new ResponseEntity<>(structFile.get(), HttpStatus.OK)
+                : new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
 }

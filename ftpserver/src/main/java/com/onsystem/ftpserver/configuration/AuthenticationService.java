@@ -11,6 +11,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
+import java.util.Optional;
+
 public class AuthenticationService implements UserDetailsService {
 
     @Autowired
@@ -25,12 +27,12 @@ public class AuthenticationService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        final UserVO user = userRepository.findByUserName(username)
-                .orElseThrow();
-
-        AttributeSession attributeSession = new AttributeSession(user.getObjectId());
+        final Optional<UserVO> user = userRepository.findByUserName(username);
+        if(user.isEmpty())
+            throw new UsernameNotFoundException("Error user is Empty");
+        AttributeSession attributeSession = new AttributeSession(user.get().getObjectId());
         managerAttributesSession.setAttributesInHttpSession(attributeSession);
 
-        return user;
+        return user.get();
     }
 }

@@ -1,17 +1,15 @@
 package com.onsystem.ftpserver.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.onsystem.ftpserver.model.VO.PermissionWorkSpaceVO;
 import com.onsystem.ftpserver.model.VO.UserVO;
 import com.onsystem.ftpserver.model.VO.WorkSpaceVO;
-import com.onsystem.ftpserver.model.dto.PermissionWorkSpaceDto;
-import com.onsystem.ftpserver.model.request.PermissionWorkSpaceCreateRequest;
 import com.onsystem.ftpserver.repository.PermissionWorkSpaceRepository;
 import com.onsystem.ftpserver.utils.ILogger;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -19,9 +17,7 @@ public class PermissionWorkSpaceServiceImpl implements PermissionWorkSpaceServic
     @Autowired
     private ILogger logger;
     @Autowired
-    private ObjectMapper objectMapper;
-    @Autowired
-    private PermissionWorkSpaceRepository workSpaceRepository;
+    private PermissionWorkSpaceRepository permissionWorkSpaceRepository;
     @Autowired
     private UserService userService;
     @Autowired
@@ -31,28 +27,23 @@ public class PermissionWorkSpaceServiceImpl implements PermissionWorkSpaceServic
     public Optional< ObjectId > insertPermissionSpace(PermissionWorkSpaceVO permissionWorkSpaceVO) {
         Optional<ObjectId> objectIdInserted = Optional.empty();
         try {
-            boolean isValid = true;
-            Optional< UserVO > userToAddPermission = userService.findById(permissionWorkSpaceVO.getUser());
-            if( userToAddPermission.isEmpty() )
-                isValid = false;
+            Optional< UserVO > searchUserToAddPermission = userService.findById(permissionWorkSpaceVO.getUser());
+            if( searchUserToAddPermission.isEmpty() )
+                return Optional.empty();
 
-            Optional< WorkSpaceVO > workSpaceToAddPermission = workSpaceService.findById(permissionWorkSpaceVO.getWorkSpace());
-            if( workSpaceToAddPermission.isEmpty() )
-                isValid = false;
+            Optional< WorkSpaceVO > searchWorkSpaceAddPermission = workSpaceService.findById(permissionWorkSpaceVO.getWorkSpace());
+            if( searchWorkSpaceAddPermission.isEmpty() )
+                return Optional.empty();
 
-            if(isValid){
-                PermissionWorkSpaceVO permissionWorkSpaceInserted = workSpaceRepository.save(permissionWorkSpaceVO);
-                userToAddPermission.get().getPermissionWorkSpace().add(permissionWorkSpaceInserted);
-                userService.updateUser(userToAddPermission.get());
+            PermissionWorkSpaceVO permissionWorkSpaceInserted = permissionWorkSpaceRepository.save(permissionWorkSpaceVO);
 
-                workSpaceToAddPermission.get().getPermissionWorkSpace().add(permissionWorkSpaceInserted);
-                workSpaceService.update(workSpaceToAddPermission.get());
+            searchUserToAddPermission.get().getPermissionWorkSpace().add(permissionWorkSpaceInserted);
+            userService.updateUser(searchUserToAddPermission.get());
 
-                objectIdInserted = Optional.of(permissionWorkSpaceInserted.getObjectId());
-            }
+            searchWorkSpaceAddPermission.get().getPermissionWorkSpace().add(permissionWorkSpaceInserted);
+            workSpaceService.update(searchWorkSpaceAddPermission.get());
 
-
-
+            objectIdInserted = Optional.of(permissionWorkSpaceInserted.getObjectId());
 
         }catch (Exception e){
             logger.logWarning(getClass(), "Cant create PermissionSpace");
@@ -62,29 +53,47 @@ public class PermissionWorkSpaceServiceImpl implements PermissionWorkSpaceServic
     }
 
     @Override
-    public Optional<ObjectId> insertPermissionSpace(PermissionWorkSpaceCreateRequest permissionWorkSpaceCreateRequest) {
-        Optional<ObjectId> objectId = Optional.empty();
-        try {
-            PermissionWorkSpaceVO permissionWorkSpaceVO = objectMapper.convertValue(permissionWorkSpaceCreateRequest, PermissionWorkSpaceVO.class);
-            objectId = insertPermissionSpace(permissionWorkSpaceVO);
-        }catch (Exception e){
-            logger.logWarning(getClass(), "Cant convert PermissionWorkSpaceDto to Vo in insertPermissionSpace");
-        }
-        return objectId;
-    }
-
-    @Override
     public Optional<PermissionWorkSpaceVO> findById(ObjectId objectId) {
-        return Optional.empty();
+        return permissionWorkSpaceRepository.findById(objectId);
     }
 
-    @Override
-    public Optional<PermissionWorkSpaceDto> findByIdDto(ObjectId objectId) {
-        return Optional.empty();
-    }
 
     @Override
     public boolean update(PermissionWorkSpaceVO permissionWorkSpaceVO) {
-        return false;
+        boolean result = false;
+
+        try {
+            if( findById( permissionWorkSpaceVO.getObjectId() ).isPresent() ){
+                permissionWorkSpaceRepository.save(permissionWorkSpaceVO);
+                result = true;
+            }
+
+        }catch (Exception e){
+            logger.logWarning(getClass(), "Cant update PermissionWorkSpaceVO");
+        }
+
+        return result;
+    }
+
+    @Override
+    public Optional< List < PermissionWorkSpaceVO > > findByUserAssignPermission(ObjectId objectId) {
+        Optional<List < PermissionWorkSpaceVO > > userPermissionsAssigned = Optional.empty();
+        try{
+            userPermissionsAssigned = Optional.of( permissionWorkSpaceRepository.findByUserAssignedPermission(objectId) );
+        }catch (Exception e){
+            logger.logWarning(getClass(), "Error method findByUserAssignPermission");
+        }
+        return userPermissionsAssigned;
+    }
+
+    @Override
+    public Optional< List < PermissionWorkSpaceVO > > findByWorkSpace(ObjectId objectId) {
+        Optional< List < PermissionWorkSpaceVO > > permissionsInWorkSpace =Optional.empty();
+        try {
+            permissionsInWorkSpace = Optional.of( permissionWorkSpaceRepository.findByWorkSpace(objectId) );
+        }catch (Exception e){
+            logger.logWarning(getClass(), "Error method findByWorkSpace");
+        }
+        return permissionsInWorkSpace;
     }
 }

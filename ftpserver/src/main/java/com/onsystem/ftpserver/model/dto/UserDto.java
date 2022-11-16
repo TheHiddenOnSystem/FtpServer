@@ -1,10 +1,6 @@
 package com.onsystem.ftpserver.model.dto;
 
-
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import lombok.*;
-import org.bson.types.ObjectId;
 
 import java.util.List;
 
@@ -12,7 +8,6 @@ import java.util.List;
 @AllArgsConstructor
 @Data
 public class UserDto{
-
     private String objectId;
     private String password;
     private String username;

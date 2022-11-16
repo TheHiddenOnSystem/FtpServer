@@ -17,6 +17,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpSession;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -37,7 +38,7 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private RoleService roleService;
     @Autowired
-    private FilesManager filesManager;
+    private FileStorageService fileStorageService;
 
     @Override
     public Optional<ObjectId> insertUser(UserRegisterRequest userRegister) {
@@ -64,7 +65,9 @@ public class UserServiceImpl implements UserService {
 
             objectId = Optional.of(userRepository.save(user).getObjectId());
 
-            filesManager.createDir(objectId.get().toString()).orElseThrow(
+            fileStorageService.createDir(
+                    objectId.get().toString()
+            ).orElseThrow(
                     () -> new IllegalArgumentException("Cant create directory")
             );
         }catch (Exception e){

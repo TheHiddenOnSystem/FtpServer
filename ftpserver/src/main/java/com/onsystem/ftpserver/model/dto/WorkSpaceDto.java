@@ -1,8 +1,6 @@
 package com.onsystem.ftpserver.model.dto;
 
 import lombok.*;
-import lombok.experimental.Tolerate;
-import org.bson.types.ObjectId;
 import java.util.List;
 
 @NoArgsConstructor
