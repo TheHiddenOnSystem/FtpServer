@@ -12,10 +12,6 @@ import java.util.Optional;
 public interface PermissionWorkSpaceService {
 
     Optional< ObjectId > insertPermissionSpace(PermissionWorkSpaceVO permissionWorkSpaceVO);
-    Optional< ObjectId > insertPermissionSpace(PermissionWorkSpaceCreateRequest permissionWorkSpaceCreateRequest);
-
     Optional< PermissionWorkSpaceVO > findById(ObjectId objectId);
-    Optional< PermissionWorkSpaceDto > findByIdDto(ObjectId objectId);
-
     boolean update(PermissionWorkSpaceVO permissionWorkSpaceVO);
 }

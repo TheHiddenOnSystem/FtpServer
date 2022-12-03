@@ -1,6 +1,7 @@
 package com.onsystem.ftpserver.model.dto;
 
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import lombok.*;
@@ -15,6 +16,7 @@ public class UserDto{
 
     private String objectId;
     private String password;
+    @JsonProperty("username")
     private String username;
     private String email;
     private boolean isAccountExpired;

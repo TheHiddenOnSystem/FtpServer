@@ -4,8 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.onsystem.ftpserver.model.VO.PermissionWorkSpaceVO;
 import com.onsystem.ftpserver.model.VO.UserVO;
 import com.onsystem.ftpserver.model.VO.WorkSpaceVO;
-import com.onsystem.ftpserver.model.dto.WorkSpaceDto;
-import com.onsystem.ftpserver.model.request.WorkSpaceCreateRequest;
+import com.onsystem.ftpserver.repository.PermissionWorkSpaceRepository;
 import com.onsystem.ftpserver.repository.WorkSpaceRepository;
 import com.onsystem.ftpserver.utils.FilesManager;
 import com.onsystem.ftpserver.utils.ILogger;
@@ -15,9 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class WorkSpaceServiceImpl implements WorkSpaceService{
@@ -33,39 +30,54 @@ public class WorkSpaceServiceImpl implements WorkSpaceService{
     @Autowired
     private UserService userService;
     @Autowired
+    private PermissionWorkSpaceRepository permissionWorkSpaceRepository;
+    @Autowired
     private FilesManager filesManager;
 
 
     @Override
-    public Optional<ObjectId> insert(WorkSpaceCreateRequest workSpaceCreateRequest) {
+    public Optional<ObjectId> insert(WorkSpaceVO workSpaceVO) {
         Optional<ObjectId> objectId = Optional.empty();
-        ObjectId userId = managerAttributesSession.getAttributesInHttpSession().getObjectId();
         try {
             Optional< UserVO > userVO = userService.findByUserLogged();
 
             if(userVO.isPresent()){
-                WorkSpaceVO workSpaceVO = objectMapper.convertValue(workSpaceCreateRequest, WorkSpaceVO.class);
-                workSpaceVO.setUser(userId);
-                workSpaceVO.setPermissionWorkSpace(List.of());
+                List<PermissionWorkSpaceVO> permissionWorkSpaceVO = new ArrayList<>();
+
+                if(workSpaceVO.getPermission()!=null){
+                    permissionWorkSpaceVO.addAll(workSpaceVO.getPermission());
+                    workSpaceVO.getPermission().clear();
+                }
 
                 WorkSpaceVO workSpaceInserted = workSpaceRepository.insert(workSpaceVO);
                 objectId = Optional.of(workSpaceInserted.getObjectId());
 
+                if(!permissionWorkSpaceVO.isEmpty()){
+                    List<PermissionWorkSpaceVO> permissionGenerated = new ArrayList<>();
+
+                    for (PermissionWorkSpaceVO permissionInsert:
+                            permissionWorkSpaceVO) {
+                        permissionInsert.setWorkSpace(workSpaceInserted.getObjectId());
+                        permissionGenerated.add(permissionWorkSpaceRepository.insert(permissionInsert));
+                    }
+                    workSpaceInserted.setPermission(permissionGenerated);
+                    workSpaceInserted= workSpaceRepository.save(workSpaceInserted);
+                }
+
                 userVO.get().getWorkSpace().add(workSpaceInserted);
-                userService.updateUser(userVO.get()).ifPresent(
-                        objectId1 -> {
-                            Optional<File> fileWorkSpace = filesManager.createDir(
-                                    userId.toString(),
-                                    workSpaceInserted.getObjectId().toString()
-                            );
-                        }
-                );
+                Optional<ObjectId> userUpdated = userService.updateUser(userVO.get());
+                if(userUpdated.isPresent()){
+                    Optional<File> fileWorkSpace = filesManager.createDir(
+                            workSpaceInserted.getUser().toString(),
+                            workSpaceInserted.getObjectId().toString()
+                    );
+                }
 
             }
 
 
         }catch (Exception e){
-            logger.logWarning(getClass(),"Cant create workspace to userId: "+managerAttributesSession.getAttributesInHttpSession().getObjectId());
+            logger.logWarning(getClass(),"Cant create workspace to userId: "+managerAttributesSession.getAttributesInHttpSession().getObjectId(),e);
             //todo quizas se podria limpiar el residuo si no proccede con exito
         }
 
@@ -75,20 +87,6 @@ public class WorkSpaceServiceImpl implements WorkSpaceService{
     @Override
     public Optional< WorkSpaceVO > findById( ObjectId objectId ) {
         return this.workSpaceRepository.findById(objectId);
-    }
-
-    @Override
-    public Optional< WorkSpaceDto > findByIdDto(ObjectId objectId) {
-        try {
-            Optional< WorkSpaceVO >  workSpaceVO = findById( objectId );
-            if (workSpaceVO.isPresent()){
-                WorkSpaceDto workSpaceDto = objectMapper.convertValue(workSpaceVO.get(),WorkSpaceDto.class);
-                return Optional.of(workSpaceDto);
-            }
-        }catch (Exception e){
-            logger.logWarning(getClass(),"Error conversion WorkSpaceVO at WorkSpaceDto by method findByIdDto");
-        }
-        return Optional.empty();
     }
 
     @Override
@@ -103,19 +101,6 @@ public class WorkSpaceServiceImpl implements WorkSpaceService{
         return Optional.empty();
     }
 
-    @Override
-    public Optional< List< WorkSpaceDto > > findByIdUserDto(ObjectId objectIdUser) {
-        try {
-            Optional< List <WorkSpaceVO> > workSpaceVO = findByIdUser(objectIdUser);
-            if(workSpaceVO.isPresent()){
-                List < WorkSpaceDto> workSpaceDtos = Arrays.asList(objectMapper.convertValue(workSpaceVO.get(),WorkSpaceDto[].class));
-                return Optional.of(workSpaceDtos);
-            }
-        }catch (Exception e){
-            logger.logWarning(getClass(),"Cant convert WorkSPaceVO to Dto");
-        }
-        return Optional.empty();
-    }
 
     @Override
     public Optional< List < WorkSpaceVO > > findByIdUser() {
@@ -123,21 +108,7 @@ public class WorkSpaceServiceImpl implements WorkSpaceService{
         return findByIdUser(userId);
     }
 
-    @Override
-    public Optional<List<WorkSpaceDto>> findByIdUserDto() {
 
-        try {
-            Optional< List< WorkSpaceVO > > workSpaceVOS = findByIdUser();
-            if (workSpaceVOS.isPresent()){
-                List< WorkSpaceDto > workSpaceDtos = Arrays.asList(objectMapper.convertValue(workSpaceVOS.get(),WorkSpaceDto[].class));
-                return Optional.of(workSpaceDtos);
-            }
-
-        }catch (Exception e){
-            logger.logWarning(getClass(), "Error convert Workspace in method findByIdUserDto");
-        }
-        return Optional.empty();
-    }
 
     @Override
     public Optional< File > createFile(String workSpace, String name) {
@@ -201,7 +172,7 @@ public class WorkSpaceServiceImpl implements WorkSpaceService{
         if(workSpaceUser.getUser().equals(userId))
             return true;
 
-        Optional< PermissionWorkSpaceVO > spaceVO = workSpaceUser.getPermissionWorkSpace()
+        Optional< PermissionWorkSpaceVO > spaceVO = workSpaceUser.getPermission()
                 .stream()
                 .filter(
                         permissionWorkSpaceVO -> permissionWorkSpaceVO.getUser() == userId

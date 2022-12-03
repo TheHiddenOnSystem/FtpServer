@@ -34,6 +34,7 @@ public class Beans {
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         mapper.configure(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT, true);
         mapper.configure(DeserializationFeature.ACCEPT_EMPTY_ARRAY_AS_NULL_OBJECT, true);
+        mapper.configure(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES, false);
 
         mapper.configure(SerializationFeature.WRITE_SELF_REFERENCES_AS_NULL,true);
         mapper.configure(SerializationFeature.FAIL_ON_SELF_REFERENCES,false);

@@ -13,11 +13,8 @@ public interface UserService {
     Optional<ObjectId> insertUser(UserRegisterRequest userRegister);
     Optional<ObjectId> updateUser(UserVO userVO);
     Optional<UserVO> findById(ObjectId id);
-    Optional<UserDto> findByIdDto(ObjectId id);
     Optional<UserVO> findByUserName(String userName);
-    Optional<UserDto> findByUserNameDto(String userName);
     Optional<UserVO> findByUserLogged();
-    Optional<UserDto> findByUserLoggedDto();
     Optional<List< UserDto >> findAllUserDto();
 
 }

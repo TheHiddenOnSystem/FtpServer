@@ -5,37 +5,44 @@ import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.file.FileSystemException;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Optional;
 
 @Service
 public class FilesManager {
+    private final String separator = File.separator;
+    private final Path path_initial=Path.of("."+separator+"storage");
 
     @Autowired
     private ILogger logger;
-    private final Path path_initial=Path.of("."+File.separator+"storage");
 
 
-    public Optional<File> createDir(String... name){
-        try{
-            URI uri = new URI(path_initial.toUri()+getPathBuilder(name));
+    public Optional<File> createDir(String... name) {
+        Optional<File> resultDirectory = Optional.empty();
+
+        try {
+            URI uri =  Path.of(path_initial.toAbsolutePath()+getPathBuilder(name)).toUri();
             File file = new File(uri);
 
             if(!file.mkdirs())
-                throw new FileSystemException("Cant create directory");
+                throw new FileSystemException(uri.getPath());
 
-            return Optional.of(file);
+            resultDirectory = Optional.of(file);
         }catch (Exception e){
-            logger.logWarning(getClass(),"Cant create Dir");
+            this.logger.logWarning(getClass(),"Cant create dir" ,e);
         }
-        return Optional.empty();
+
+        return resultDirectory;
+
     }
 
-    public Optional< File > createNewFile(String... path){
+    public Optional< File > createNewFile(String... path) {
         try{
 
-            URI uri = new URI(path_initial.toUri()+getPathBuilder(path));
+            URI uri = Path.of(path_initial.toAbsolutePath()+getPathBuilder(path)).toUri();
             File file = new File(uri);
 
             if(!file.createNewFile())
@@ -43,7 +50,7 @@ public class FilesManager {
 
             return Optional.of(file);
         }catch (Exception e){
-            logger.logWarning(getClass(),"Cant create file");
+            logger.logWarning(getClass(),"Cant create file",e);
         }
         return Optional.empty();
     }
@@ -52,7 +59,7 @@ public class FilesManager {
 
         for (String path:
              paths) {
-            pathBuilder.append(File.separator)
+            pathBuilder.append(separator)
                     .append(path);
         }
 

@@ -22,7 +22,7 @@ public class WorkSpaceVO {
     private String name;
 
     @DocumentReference
-    private List< PermissionWorkSpaceVO > permissionWorkSpace;
+    private List< PermissionWorkSpaceVO > permission;
 
     public void setObjectId(ObjectId objectId) {
         this.objectId = objectId;

@@ -20,11 +20,10 @@ public class PermissionWorkSpaceVO {
     @JsonSerialize(using= ToStringSerializer.class)
     private @MongoId ObjectId objectId;
     @JsonSerialize(using= ToStringSerializer.class)
-
     private ObjectId workSpace;
     @JsonSerialize(using= ToStringSerializer.class)
-
     private ObjectId user;
+
     private List<String> permission;
 
 
@@ -46,10 +45,12 @@ public class PermissionWorkSpaceVO {
     }
     @Tolerate
     public void setWorkSpace(String workSpace) {
-        this.workSpace = new ObjectId(workSpace);
+        if(workSpace!=null)
+            this.workSpace = new ObjectId(workSpace);
     }
     @Tolerate
     public void setUser(String users) {
-        this.user = new ObjectId(users);
+        if(users!=null)
+            this.user = new ObjectId(users);
     }
 }

@@ -1,9 +1,12 @@
 package com.onsystem.ftpserver.controllers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.onsystem.ftpserver.model.VO.WorkSpaceVO;
-import com.onsystem.ftpserver.model.dto.WorkSpaceDto;
 import com.onsystem.ftpserver.model.request.WorkSpaceCreateRequest;
 import com.onsystem.ftpserver.service.WorkSpaceService;
+import com.onsystem.ftpserver.utils.AttributeSession;
+import com.onsystem.ftpserver.utils.ILogger;
+import com.onsystem.ftpserver.utils.ManagerAttributesSession;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.bson.types.ObjectId;
@@ -20,9 +23,15 @@ import java.util.Optional;
 @Controller
 @RequestMapping("/api/v1/workspace/")
 public class WorkSpaceController {
-
+    @Autowired
+    private ILogger logger;
+    @Autowired
+    private ManagerAttributesSession managerAttributesSession;
+    @Autowired
+    private ObjectMapper objectMapper;
     @Autowired
     private WorkSpaceService workSpaceService;
+
 
 
     @PutMapping("insert")
@@ -34,7 +43,18 @@ public class WorkSpaceController {
             }
     )
     public ResponseEntity < ? > insertWorkSpace(@RequestBody WorkSpaceCreateRequest workSpaceCreateRequest){
-        Optional< ObjectId > objectId = workSpaceService.insert(workSpaceCreateRequest);
+        Optional< ObjectId > objectId = Optional.empty();
+
+        try {
+            workSpaceCreateRequest.getPermission().forEach(a->a.setWorkSpace(null));
+
+            AttributeSession attributeSession = managerAttributesSession.getAttributesInHttpSession();
+            WorkSpaceVO workSpaceVO = objectMapper.convertValue(workSpaceCreateRequest, WorkSpaceVO.class);
+            workSpaceVO.setUser(attributeSession.getObjectId());
+            objectId = workSpaceService.insert(workSpaceVO);
+        }catch (Exception e){
+            logger.logWarning(getClass(),"Cant cast WorkSpaceDto to vo in insertWorkSpace",e);
+        }
 
         return objectId.isPresent() ?
                 new ResponseEntity<>(objectId.get().toString(), HttpStatus.OK) :
@@ -50,7 +70,7 @@ public class WorkSpaceController {
             }
     )
     public ResponseEntity < ? > getWorkSpace(){
-        Optional< List <WorkSpaceDto> > workSpaceVO = workSpaceService.findByIdUserDto();
+        Optional< List <WorkSpaceVO> > workSpaceVO = workSpaceService.findByIdUser();
         return workSpaceVO.isPresent()?
                 new ResponseEntity<>(workSpaceVO.get(), HttpStatus.OK) :
                 new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR) ;

@@ -1,6 +1,8 @@
 package com.onsystem.ftpserver.model.VO;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import lombok.Data;
@@ -21,6 +23,7 @@ public class UserVO implements UserDetails {
     @JsonSerialize(using= ToStringSerializer.class)
     private @MongoId ObjectId objectId;
     private String password;
+    @JsonProperty("username")
     private String username;
     private String email;
     private boolean isAccountExpired;

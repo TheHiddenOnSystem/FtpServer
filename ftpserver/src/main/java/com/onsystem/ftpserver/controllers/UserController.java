@@ -1,8 +1,10 @@
 package com.onsystem.ftpserver.controllers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.onsystem.ftpserver.model.VO.UserVO;
 import com.onsystem.ftpserver.model.dto.UserDto;
 import com.onsystem.ftpserver.service.UserService;
+import com.onsystem.ftpserver.utils.ILogger;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +21,10 @@ import java.util.Optional;
 @RequestMapping("/api/v1/user/")
 public class UserController {
 
-
+    @Autowired
+    private ILogger logger;
+    @Autowired
+    private ObjectMapper objectMapper;
     @Autowired
     private UserService iUserService;
 
@@ -32,11 +37,21 @@ public class UserController {
             }
     )
     public ResponseEntity < ? > userLoggedInfo(){
-        Optional < UserDto > userVO = iUserService.findByUserLoggedDto();
+        Optional < UserDto > userDto = Optional.empty();
 
-        return userVO.isPresent() ?
-                new ResponseEntity<>(userVO.get(), HttpStatus.OK) :
-                new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        try {
+            Optional<UserVO> userVO = iUserService.findByUserLogged();
+            if(userVO.isPresent())
+                userDto = Optional.of(
+                        objectMapper.convertValue(userVO.get(), UserDto.class)
+                );
+        }catch (Exception e){
+            logger.logWarning(getClass(), "Cant cast Vo to Dto in userLoggedInfo ");
+        }
+
+        return userDto.isPresent()
+                ? new ResponseEntity<>(userDto.get(), HttpStatus.OK)
+                : new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
 

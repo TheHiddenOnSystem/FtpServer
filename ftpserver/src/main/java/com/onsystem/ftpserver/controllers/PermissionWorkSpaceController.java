@@ -1,10 +1,12 @@
 package com.onsystem.ftpserver.controllers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.onsystem.ftpserver.model.VO.PermissionWorkSpaceVO;
 import com.onsystem.ftpserver.model.dto.PermissionWorkSpaceDto;
 import com.onsystem.ftpserver.model.request.PermissionWorkSpaceCreateRequest;
 import com.onsystem.ftpserver.repository.PermissionWorkSpaceRepository;
 import com.onsystem.ftpserver.service.PermissionWorkSpaceService;
+import com.onsystem.ftpserver.utils.ILogger;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.bson.types.ObjectId;
@@ -21,9 +23,12 @@ import java.util.Optional;
 @Controller
 @RequestMapping("/api/v1/permissionWorkSpace/")
 public class PermissionWorkSpaceController {
-
+    @Autowired
+    private ILogger logger;
     @Autowired
     private PermissionWorkSpaceService workSpaceService;
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @PutMapping("insert")
     @Operation(
@@ -34,7 +39,15 @@ public class PermissionWorkSpaceController {
             }
     )
     public ResponseEntity< ? > insertPermissionInWorkSpace(@RequestBody PermissionWorkSpaceCreateRequest permissionWorkSpaceCreateRequest){
-        Optional< ObjectId > objectId = workSpaceService.insertPermissionSpace(permissionWorkSpaceCreateRequest);
+        Optional< ObjectId > objectId = Optional.empty();
+
+        try {
+            objectId = workSpaceService.insertPermissionSpace(
+                    objectMapper.convertValue(permissionWorkSpaceCreateRequest,PermissionWorkSpaceVO.class)
+            );
+        }catch (Exception e){
+            logger.logWarning( getClass(), " Cant cast request to VO ");
+        }
 
         return objectId.isPresent() ?
                 new ResponseEntity<>(objectId.get(), HttpStatus.OK) :
