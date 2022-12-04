@@ -28,6 +28,23 @@ public class UserController {
     @Autowired
     private UserService iUserService;
 
+
+    @GetMapping("isAuthenticate")
+    @Operation(
+            description = "Test if isAuthenticate",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "If is Authenticate"),
+                    @ApiResponse(responseCode = "403", description = "If isn't Authenticate"),
+                    @ApiResponse(responseCode = "500", description = "If isn't authentication")
+            }
+    )
+    public ResponseEntity< ? > isAuthenticate (){
+        boolean isAuthenticate = iUserService.isAuthenticate();
+        return isAuthenticate
+                ? new ResponseEntity<>(HttpStatus.OK)
+                : new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
     @GetMapping("getMyInfo")
     @Operation(
             description = "Get Info user logged",

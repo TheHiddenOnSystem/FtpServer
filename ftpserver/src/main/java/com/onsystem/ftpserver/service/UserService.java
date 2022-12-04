@@ -17,4 +17,6 @@ public interface UserService {
     Optional<UserVO> findByUserLogged();
     Optional<List< UserDto >> findAllUserDto();
 
+    boolean isAuthenticate();
+
 }

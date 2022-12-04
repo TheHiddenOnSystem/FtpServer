@@ -13,9 +13,6 @@ import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
-
-import java.net.URISyntaxException;
-import java.nio.file.FileSystemException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -114,6 +111,18 @@ public class UserServiceImpl implements UserService {
             logger.logWarning(getClass(), "Cant getAll users dto in findAllUserDto");
         }
         return listUser;
+    }
+
+    @Override
+    public boolean isAuthenticate() {
+        boolean isAuthenticate = false;
+        try {
+            if(managerAttributesSession.getAttributesInHttpSession().getObjectId() != null)
+                isAuthenticate = true;
+        }catch (Exception e){
+            this.logger.logInfo(getClass(),"User Not Authenticate",e);
+        }
+        return isAuthenticate;
     }
 
 
