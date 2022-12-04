@@ -5,6 +5,7 @@ import com.onsystem.ftpserver.model.VO.WorkSpaceVO;
 import com.onsystem.ftpserver.model.request.WorkSpaceCreateRequest;
 import com.onsystem.ftpserver.service.WorkSpaceService;
 import com.onsystem.ftpserver.utils.AttributeSession;
+import com.onsystem.ftpserver.utils.FileNode;
 import com.onsystem.ftpserver.utils.ILogger;
 import com.onsystem.ftpserver.utils.ManagerAttributesSession;
 import io.swagger.v3.oas.annotations.Operation;
@@ -112,5 +113,22 @@ public class WorkSpaceController {
         return file.isPresent()?
                 new ResponseEntity<>(HttpStatus.OK) :
                 new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR) ;
+    }
+
+    @PostMapping("getFileNodeInWorkSpace")
+    @Operation(
+            description = "Show directories tree with files",
+            responses = {
+                    @ApiResponse( responseCode = "200", description = "Return info main directory workspace"),
+                    @ApiResponse( responseCode = "500", description = "Cant create file")
+            }
+    )
+    public ResponseEntity< ? > getMainDirectoryWorkSpace(@RequestParam("objectId") String objectId){
+        Optional< FileNode > fileNodes = this.workSpaceService.getDirectories(objectId);
+
+        return fileNodes.isPresent()
+                ? new ResponseEntity<>(fileNodes.get(),HttpStatus.OK)
+                : new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+
     }
 }

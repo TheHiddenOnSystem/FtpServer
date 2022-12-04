@@ -6,12 +6,14 @@ import com.onsystem.ftpserver.model.VO.UserVO;
 import com.onsystem.ftpserver.model.VO.WorkSpaceVO;
 import com.onsystem.ftpserver.repository.PermissionWorkSpaceRepository;
 import com.onsystem.ftpserver.repository.WorkSpaceRepository;
+import com.onsystem.ftpserver.utils.FileNode;
 import com.onsystem.ftpserver.utils.FilesManager;
 import com.onsystem.ftpserver.utils.ILogger;
 import com.onsystem.ftpserver.utils.ManagerAttributesSession;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.webjars.NotFoundException;
 
 import java.io.File;
 import java.util.*;
@@ -95,7 +97,7 @@ public class WorkSpaceServiceImpl implements WorkSpaceService{
         try {
             return workSpaceRepository.findByUserId(objectIdUser);
         }catch (Exception e){
-            logger.logWarning(getClass(), "Cant filter WorkSpace By idUser: " + objectIdUser);
+            logger.logWarning(getClass(), "Cant filter WorkSpace By idUser: " + objectIdUser,e);
         }
 
         return Optional.empty();
@@ -124,7 +126,7 @@ public class WorkSpaceServiceImpl implements WorkSpaceService{
             }
 
         }catch (Exception e){
-            logger.logWarning(getClass(), "Cant create file userId: " +userId);
+            logger.logWarning(getClass(), "Cant create file userId: " +userId,e);
         }
 
         return file;
@@ -145,7 +147,7 @@ public class WorkSpaceServiceImpl implements WorkSpaceService{
                 );
 
         }catch (Exception e){
-            logger.logWarning(getClass(), "Cant create directory userId: "+userId);
+            logger.logWarning(getClass(), "Cant create directory userId: "+userId,e);
         }
         return directory;
     }
@@ -158,11 +160,33 @@ public class WorkSpaceServiceImpl implements WorkSpaceService{
         }catch (Exception e){
             logger.logInfo(getClass(),"Cant update Workspace, "
                     + String.format("user: %s , workspace: %s", managerAttributesSession.getAttributesInHttpSession().getObjectId()
-                        ,workSpaceVO.getObjectId())
+                        ,workSpaceVO.getObjectId()
+                    ,e)
             );
         }
 
         return objectId;
+    }
+
+    @Override
+    public Optional<FileNode> getDirectories(String workSpaceObjectId) {
+        Optional<FileNode> result = Optional.empty();
+        try {
+            ObjectId id = new ObjectId(workSpaceObjectId);
+            WorkSpaceVO workSpaceVO = this.workSpaceRepository.findById(id).orElseThrow(() -> new NotFoundException("Not found workspace register"));
+
+
+            result = Optional.of(
+                this.filesManager.getNodesInDirectory(workSpaceVO.getUser().toString(),workSpaceVO.getObjectId().toString())
+            );
+        }catch (Exception e){
+            logger.logInfo(getClass(),"Cant get nodule in workspace, "
+                    + String.format("user: %s , workspace: %s", managerAttributesSession.getAttributesInHttpSession().getObjectId()
+                    ,workSpaceObjectId,
+                    e)
+            );
+        }
+        return result;
     }
 
     private boolean userHavePermissionOrIsOwner(ObjectId workSpaceId, ObjectId userId, String permission){
@@ -184,4 +208,7 @@ public class WorkSpaceServiceImpl implements WorkSpaceService{
 
         return canCreate;
     }
+
+
+
 }

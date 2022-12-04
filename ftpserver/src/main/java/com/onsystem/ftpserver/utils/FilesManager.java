@@ -5,11 +5,9 @@ import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.nio.file.FileSystemException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class FilesManager {
@@ -65,5 +63,56 @@ public class FilesManager {
 
         return pathBuilder.toString();
     }
+
+    public FileNode getNodesInDirectory(String... route) throws NullPointerException,IllegalArgumentException{
+
+        Path path= Path.of(path_initial.toAbsolutePath()+getPathBuilder(route));
+        File directory = path.toFile();
+
+        FileNode fileNodeInDirectory = new FileNode();
+        fileNodeInDirectory.setName(directory.getName());
+        fileNodeInDirectory.setPath(directory.getAbsolutePath());
+
+        if(directory.isDirectory() && directory.exists()){
+            fileNodeInDirectory.setDirectory(true);
+            fileNodeInDirectory.setChildren(
+                    recursiveListFile(
+                            Objects.requireNonNull(directory.listFiles())
+                    )
+            );
+
+        }
+        else
+            throw new IllegalArgumentException("Require directory and is file or not exist " + directory.getAbsolutePath());
+
+        return fileNodeInDirectory;
+    }
+
+
+    private List<FileNode> recursiveListFile(File[] filesInDirectory) throws NullPointerException{
+        List<FileNode> fileNodesResult = new ArrayList<>();
+
+        for (File file:
+             filesInDirectory) {
+            FileNode fileNodeInDirectory = new FileNode();
+            fileNodeInDirectory.setName(file.getName());
+            fileNodeInDirectory.setPath(file.getAbsolutePath());
+
+            if(file.isDirectory()){
+                fileNodeInDirectory.setDirectory(true);
+                fileNodeInDirectory.setChildren(recursiveListFile(Objects.requireNonNull(file.listFiles())));
+
+            }else{
+                fileNodeInDirectory.setDirectory(false);
+            }
+
+            fileNodesResult.add(fileNodeInDirectory);
+
+        }
+
+        return fileNodesResult;
+    }
+
+
 
 }
