@@ -11,6 +11,6 @@ import java.util.Optional;
 @Repository
 public interface RoleRepository extends MongoRepository<RoleVO, ObjectId> {
 
-    @Query( "{ name: ?0 }" )
+    @Query( value = "{ name: ?0 }" )
     Optional<RoleVO> findByName(String name);
 }

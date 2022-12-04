@@ -34,7 +34,7 @@ public class SessionServiceImpl implements SessionService{
             SecurityContextHolder.getContext().setAuthentication(authentication);
             return true;
         }catch (Exception e){
-            logger.logWarning(getClass(),"No se ha podido logear el usuario: "+username);
+            logger.logWarning(getClass(),"No se ha podido logear el usuario: " + username);
         }
 
         return false;

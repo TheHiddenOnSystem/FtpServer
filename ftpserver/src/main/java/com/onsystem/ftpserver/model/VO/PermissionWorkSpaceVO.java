@@ -5,8 +5,6 @@ package com.onsystem.ftpserver.model.VO;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
 import lombok.experimental.Tolerate;
 import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.core.mapping.Document;
