@@ -1,5 +1,5 @@
 import { createAsyncThunk } from "@reduxjs/toolkit"
-import { openSnackBar } from "../notificationStore";
+import { openSnackBar } from "../storage/notificationStore";
 import { loggin, register } from "../petitions/authorizeController";
 
 export const logginAction = createAsyncThunk('auth/logging', async ({

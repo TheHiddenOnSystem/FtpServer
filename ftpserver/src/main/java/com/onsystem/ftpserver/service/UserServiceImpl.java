@@ -99,18 +99,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Optional<List < UserDto > > findAllUserDto() {
-        Optional< List < UserDto > > listUser = Optional.empty();
-        try {
-            listUser = Optional.of(
-                    Arrays.asList(
-                            objectMapper.convertValue(userRepository.findAll(), UserDto[].class)
-                    )
-            );
-        }catch (Exception e){
-            logger.logWarning(getClass(), "Cant getAll users dto in findAllUserDto");
-        }
-        return listUser;
+    public List < UserVO > findAll() {
+        return userRepository.findAll();
     }
 
     @Override

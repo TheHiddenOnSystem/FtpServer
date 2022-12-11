@@ -14,6 +14,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -63,7 +64,7 @@ public class UserController {
                         objectMapper.convertValue(userVO.get(), UserDto.class)
                 );
         }catch (Exception e){
-            logger.logWarning(getClass(), "Cant cast Vo to Dto in userLoggedInfo ");
+            logger.logWarning(getClass(), "Cant cast Vo to Dto in userLoggedInfo ", e);
         }
 
         return userDto.isPresent()
@@ -81,11 +82,21 @@ public class UserController {
             }
     )
     public ResponseEntity < ? > getAllUsers(){
-        Optional < List < UserDto > > allUsers = iUserService.findAllUserDto();
 
-        return allUsers.isPresent() ?
-                new ResponseEntity<>(allUsers.get(), HttpStatus.OK) :
-                new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+
+        try {
+            List < UserVO > allUsers = iUserService.findAll();
+
+            List < UserDto > allUsersDto = Arrays.asList(
+                    objectMapper.convertValue(allUsers, UserDto[].class)
+            );
+
+            return new ResponseEntity<>(allUsersDto,HttpStatus.OK);
+
+        }catch (Exception e){
+            this.logger.logWarning(getClass(),"Error get all user register",e);
+        }
+        return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
 }

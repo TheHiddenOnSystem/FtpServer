@@ -55,6 +55,7 @@ public class WorkSpaceServiceImpl implements WorkSpaceService{
                 objectId = Optional.of(workSpaceInserted.getObjectId());
 
                 if(!permissionWorkSpaceVO.isEmpty()){
+
                     List<PermissionWorkSpaceVO> permissionGenerated = new ArrayList<>();
 
                     for (PermissionWorkSpaceVO permissionInsert:
@@ -95,7 +96,7 @@ public class WorkSpaceServiceImpl implements WorkSpaceService{
     public Optional< List < WorkSpaceVO > > findByIdUser( ObjectId objectIdUser ) {
 
         try {
-            return workSpaceRepository.findByUserId(objectIdUser);
+            return Optional.of(workSpaceRepository.findByUserId(objectIdUser));
         }catch (Exception e){
             logger.logWarning(getClass(), "Cant filter WorkSpace By idUser: " + objectIdUser,e);
         }
@@ -200,7 +201,7 @@ public class WorkSpaceServiceImpl implements WorkSpaceService{
                 .stream()
                 .filter(
                         permissionWorkSpaceVO -> permissionWorkSpaceVO.getUser() == userId
-                                && permissionWorkSpaceVO.getPermission().stream().anyMatch(s -> s.contains(permission))
+                                && permissionWorkSpaceVO.getPermission().stream().anyMatch(s -> s.getName().contains(permission))
                 )
                 .findFirst();
         if(spaceVO.isPresent())

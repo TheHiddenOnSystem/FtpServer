@@ -1,20 +1,27 @@
-
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import { Layout } from './components/layout/layout';
+import Home from './pages/home/home';
 import { LogginAndRegister } from './pages/login/loginAndResister';
-import { LOGGIN_AND_REGISTER } from './routes/web';
+import WorkSpace from './pages/workSpace/workSpace';
+import { URL_WEB_SHOW_WORKSPACE, URL_WEB_HOME, URL_WEB_LOGGIN_AND_REGISTER } from './routes/web';
 
 function App() {
+
+
+
   return (
-    <Layout>
-      <BrowserRouter>
+    <BrowserRouter>
+      <Layout>
         <Routes>
-          <Route element={<LogginAndRegister/>} path={LOGGIN_AND_REGISTER}/>
-          <Route element={<p>Home</p>} path={"home"}/>
+          <Route path={URL_WEB_LOGGIN_AND_REGISTER} element={<LogginAndRegister/>}/>
+          <Route path={URL_WEB_HOME}  element={<Home/>} />
+          <Route path={URL_WEB_SHOW_WORKSPACE} element={<WorkSpace/>}/>
         </Routes>
-      </BrowserRouter>
-    </Layout>
+      </Layout>
+    </BrowserRouter>
   );
 }
 
 export default App;
+
+

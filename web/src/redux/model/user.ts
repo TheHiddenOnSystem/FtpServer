@@ -1,42 +1,33 @@
 
-
-export type UserDto = {
-    objectId:String,
-    name:String,
-    username:String,
-    email:String,
-    roles: [
-        {
-            objectId:String,
-            name:String
-        }
-    ],
-    workSpace: [
-        {
-            objectId:String,
-            user:String,
-            name:String,
-            permissionWorkSpace:[
-                {
-                    objectId:String,
-                    workSpace:String,
-                    user:String,
-                    permission:String[]
-                }
-            ],
-
-        }
-    ],
-    permissionWorkSpace:[
-        {
-            objectId:String,
-            workSpace:String,
-            user:String,
-            permission:String[]
-        }
-    ]
+export type WorkSpaceDto = {
+    objectId: string,
+    user: string,
+    name: string,
+    permissionWorkSpace: PermissionWorkSpaceDto[]
 
 }
+export type PermissionWorkSpaceDto = {
+    objectId: string,
+    workSpace: string,
+    user: string,
+    permission: string[]
+}
+export type RoleDto = {
+    objectId: string,
+    name: string
+}
+
+export type UserDto = {
+    objectId:string,
+    name:string,
+    username:string,
+    email:string,
+    roles: RoleDto[],
+    workSpace: WorkSpaceDto[],
+    permissionWorkSpace: PermissionWorkSpaceDto[]
+
+}
+
 
 
 

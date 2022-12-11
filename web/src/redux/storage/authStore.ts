@@ -1,6 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit"
-import { logginAction } from "./actions/authAction"
-import { RootState } from "./store"
+import { logginAction } from "../actions/authAction"
+import { RootState } from "../store"
 
 export interface AuthState{
     isLoggin:boolean,

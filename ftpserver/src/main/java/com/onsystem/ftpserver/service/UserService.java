@@ -15,7 +15,7 @@ public interface UserService {
     Optional<UserVO> findById(ObjectId id);
     Optional<UserVO> findByUserName(String userName);
     Optional<UserVO> findByUserLogged();
-    Optional<List< UserDto >> findAllUserDto();
+    List < UserVO > findAll();
 
     boolean isAuthenticate();
 

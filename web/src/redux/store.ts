@@ -1,13 +1,15 @@
 import { configureStore, ThunkAction, Action } from '@reduxjs/toolkit';
-import AuthReducer from './authStore';
-import NotificationReducer from './notificationStore'
-import UserReducer from './notificationStore'
+import AuthReducer from './storage/authStore';
+import ExplorerReducer from './storage/exploreStore';
+import NotificationReducer from './storage/notificationStore'
+import UserReducer from './storage/userStore'
 
 export const store = configureStore({
   reducer: {
     auth: AuthReducer,
     notify: NotificationReducer,
-    user:UserReducer
+    user: UserReducer,
+    explorer: ExplorerReducer
   }
 }
 //,applyMiddleware(thunk)

@@ -1,5 +1,6 @@
 package com.onsystem.ftpserver.model.dto;
 
+import com.onsystem.ftpserver.model.VO.PermissionVO;
 import lombok.*;
 
 
@@ -12,5 +13,5 @@ public class PermissionWorkSpaceDto {
     private String objectId;
     private String workSpace;
     private String user;
-    private List<String> permission;
+    private List<PermissionVO> permission;
 }

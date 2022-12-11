@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.experimental.Tolerate;
 import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.DocumentReference;
 import org.springframework.data.mongodb.core.mapping.MongoId;
 
 import java.util.List;
@@ -22,7 +23,8 @@ public class PermissionWorkSpaceVO {
     @JsonSerialize(using= ToStringSerializer.class)
     private ObjectId user;
 
-    private List<String> permission;
+    @DocumentReference
+    private List<PermissionVO> permission;
 
 
     public void setObjectId(ObjectId objectId) {

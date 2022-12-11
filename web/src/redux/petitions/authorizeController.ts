@@ -33,4 +33,6 @@ export const loggin =(
 )=> axios.post(LOGGING,{
     name:username,
     password:password
+},{
+    withCredentials:true
 })

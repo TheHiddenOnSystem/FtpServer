@@ -1,5 +1,5 @@
-import { Button, Container, Grid, Paper, TextField } from '@mui/material'
-import { useState,useCallback } from 'react'
+import { Button, Container, Grid, Paper, Stack, TextField } from '@mui/material'
+import { useState, useCallback } from 'react'
 import { TabPanel } from '../../components/tabPanel/tabPanel'
 import { logginAction, registerAction } from '../../redux/actions/authAction'
 import { useAppDispatch } from '../../redux/hooks'
@@ -23,28 +23,35 @@ const headers = [
 export const LogginAndRegister = () => {
 
     return (
-        <Container
-            maxWidth={"xs"}
+        <Stack
+            height={"70%"}
+            alignContent={"center"}
+            justifyContent={"center"}>
+
+            <Container
+                maxWidth={"xs"}
             >
-            <Paper sx={{
-                padding:"3%"
-            }}>
-                <TabPanel headers={headers}>
-                    {
-                        [
-                            {
-                                children: <Loggin />,
-                                index: 0
-                            },
-                            {
-                                children: <Register />,
-                                index: 1
-                            }
-                        ]
-                    }
-                </TabPanel>
-            </Paper>
-        </Container>
+                <Paper sx={{
+                    padding: "3%"
+                }}>
+                    <TabPanel key='logginAndResgister' headers={headers}>
+                        {
+                            [
+                                {
+                                    children: <Loggin />,
+                                    index: 0
+                                },
+                                {
+                                    children: <Register />,
+                                    index: 1
+                                }
+                            ]
+                        }
+                    </TabPanel>
+                </Paper>
+            </Container>
+        </Stack>
+
     )
 }
 
@@ -62,9 +69,9 @@ const Loggin = () => {
     })
 
 
-    const actionSubmit = useCallback(()=>{
+    const actionSubmit = useCallback(() => {
         dispatch(logginAction(state))
-    },[state,dispatch])
+    }, [state, dispatch])
 
     return (
         <Grid container direction="column" spacing={4}>
@@ -93,7 +100,7 @@ const Loggin = () => {
 }
 
 const Register = () => {
-    const dispatch=useAppDispatch();
+    const dispatch = useAppDispatch();
     const [state, setState] = useState<{
         username: String,
         password: String,
@@ -107,17 +114,17 @@ const Register = () => {
     /*
 const [validateState,setValidateState] = useState<{
         username:Boolean,
-        email:Boolean,
-        password:Boolean,
+            email:Boolean,
+            password:Boolean,
     }>({
-        username:true,
-        email: true,
-        password: true
+                username:true,
+            email: true,
+            password: true
     })
-    */
-    const actionSubmit = useCallback(()=>{
+            */
+    const actionSubmit = useCallback(() => {
         dispatch(registerAction(state))
-    },[state,dispatch])
+    }, [state, dispatch])
 
     return (
         <Grid container direction="column" spacing={4}>
